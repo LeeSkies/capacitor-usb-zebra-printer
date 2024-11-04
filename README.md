@@ -13,25 +13,63 @@ npx cap sync
 
 <docgen-index>
 
-* [`echo(...)`](#echo)
+* [`discoverPrinters()`](#discoverprinters)
+* [`requestPermission(...)`](#requestpermission)
+* [`print(...)`](#print)
+* [Interfaces](#interfaces)
 
 </docgen-index>
 
 <docgen-api>
 <!--Update the source file JSDoc comments and rerun docgen to update the docs below-->
 
-### echo(...)
+### discoverPrinters()
 
 ```typescript
-echo(options: { value: string; }) => Promise<{ value: string; }>
+discoverPrinters() => Promise<{ printers: ZebraPrinterInfo[]; }>
 ```
 
-| Param         | Type                            |
-| ------------- | ------------------------------- |
-| **`options`** | <code>{ value: string; }</code> |
-
-**Returns:** <code>Promise&lt;{ value: string; }&gt;</code>
+**Returns:** <code>Promise&lt;{ printers: ZebraPrinterInfo[]; }&gt;</code>
 
 --------------------
+
+
+### requestPermission(...)
+
+```typescript
+requestPermission(options: { address: string; }) => Promise<{ granted: boolean; }>
+```
+
+| Param         | Type                              |
+| ------------- | --------------------------------- |
+| **`options`** | <code>{ address: string; }</code> |
+
+**Returns:** <code>Promise&lt;{ granted: boolean; }&gt;</code>
+
+--------------------
+
+
+### print(...)
+
+```typescript
+print(options: { address: string; data: string; }) => Promise<void>
+```
+
+| Param         | Type                                            |
+| ------------- | ----------------------------------------------- |
+| **`options`** | <code>{ address: string; data: string; }</code> |
+
+--------------------
+
+
+### Interfaces
+
+
+#### ZebraPrinterInfo
+
+| Prop          | Type                |
+| ------------- | ------------------- |
+| **`name`**    | <code>string</code> |
+| **`address`** | <code>string</code> |
 
 </docgen-api>
