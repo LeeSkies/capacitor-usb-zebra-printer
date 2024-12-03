@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 public class UsbZebraPrinter {
-    private static final String ACTION_USB_PERMISSION = "com.leeskies.capacitor.capacitorusbzebraprinter.USB_PERMISSION";
+    private static final String ACTION_USB_PERMISSION = "com.leeskies.capacitorzebraprinter.USB_PERMISSION";
     private final Map<String, DiscoveredPrinterUsb> discoveredPrinters = new HashMap<>();
     private final Context context;
     private final UsbManager usbManager;
