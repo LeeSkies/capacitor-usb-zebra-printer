@@ -8,6 +8,7 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.app.PendingIntent;
 import android.os.Build;
+import android.content.SharedPreferences;
 
 import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
@@ -20,16 +21,22 @@ import com.zebra.sdk.printer.discovery.DiscoveryHandler;
 import com.zebra.sdk.printer.discovery.UsbDiscoverer;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class UsbZebraPrinter {
     private static final String ACTION_USB_PERMISSION = "com.leeskies.capacitorzebraprinter.USB_PERMISSION";
+    private static final String PREFS_NAME = "ZebraPrinterPrefs";
+    private static final String PREF_PERMITTED_DEVICES = "permitted_devices";
+    
     private final Map<String, DiscoveredPrinterUsb> discoveredPrinters = new HashMap<>();
     private final Context context;
     private final UsbManager usbManager;
     private final PendingIntent permissionIntent;
+    private final SharedPreferences prefs;
     private EventEmitter eventEmitter;
     private BroadcastReceiver usbReceiver;
 
@@ -40,6 +47,7 @@ public class UsbZebraPrinter {
     public UsbZebraPrinter(Context context) {
         this.context = context;
         this.usbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
+        this.prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
 
         // Use FLAG_IMMUTABLE for Android 12+ compatibility
         int flags = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ?
@@ -59,6 +67,12 @@ public class UsbZebraPrinter {
                     synchronized (this) {
                         UsbDevice device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
                         boolean granted = intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false);
+                        
+                        if (granted && device != null) {
+                            // Save the permission
+                            saveDevicePermission(device.getDeviceName());
+                        }
+                        
                         if (eventEmitter != null) {
                             JSObject result = new JSObject()
                                     .put("granted", granted)
@@ -77,6 +91,21 @@ public class UsbZebraPrinter {
         } else {
             context.registerReceiver(usbReceiver, filter);
         }
+    }
+
+    private void saveDevicePermission(String deviceAddress) {
+        Set<String> permittedDevices = new HashSet<>(prefs.getStringSet(PREF_PERMITTED_DEVICES, new HashSet<>()));
+        permittedDevices.add(deviceAddress);
+        prefs.edit().putStringSet(PREF_PERMITTED_DEVICES, permittedDevices).apply();
+    }
+
+    private boolean hasStoredPermission(String deviceAddress) {
+        Set<String> permittedDevices = prefs.getStringSet(PREF_PERMITTED_DEVICES, new HashSet<>());
+        return permittedDevices.contains(deviceAddress);
+    }
+
+    public void clearStoredPermissions() {
+        prefs.edit().remove(PREF_PERMITTED_DEVICES).apply();
     }
 
     public void cleanup() {
@@ -131,9 +160,18 @@ public class UsbZebraPrinter {
             return response;
         }
 
+        // Check if we already have stored permission
+        if (hasStoredPermission(address)) {
+            response.put("granted", true);
+            return response;
+        }
+
         boolean hasPermission = usbManager.hasPermission(printer.device);
         if (!hasPermission) {
             usbManager.requestPermission(printer.device, permissionIntent);
+        } else {
+            // If we have system permission but haven't stored it yet, store it
+            saveDevicePermission(address);
         }
 
         response.put("granted", hasPermission);
@@ -149,7 +187,8 @@ public class UsbZebraPrinter {
                 throw new IllegalArgumentException("Printer not found");
             }
 
-            if (!usbManager.hasPermission(printer.device)) {
+            // Check both stored permission and system permission
+            if (!hasStoredPermission(address) && !usbManager.hasPermission(printer.device)) {
                 throw new SecurityException("No permission to communicate with printer");
             }
 
