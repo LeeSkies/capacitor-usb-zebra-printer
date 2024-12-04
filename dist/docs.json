@@ -1,0 +1,83 @@
+{
+  "api": {
+    "name": "UsbZebraPrinterPlugin",
+    "slug": "usbzebraprinterplugin",
+    "docs": "",
+    "tags": [],
+    "methods": [
+      {
+        "name": "discoverPrinters",
+        "signature": "() => Promise<{ printers: ZebraPrinterInfo[]; }>",
+        "parameters": [],
+        "returns": "Promise<{ printers: ZebraPrinterInfo[]; }>",
+        "tags": [],
+        "docs": "",
+        "complexTypes": [
+          "ZebraPrinterInfo"
+        ],
+        "slug": "discoverprinters"
+      },
+      {
+        "name": "requestPermission",
+        "signature": "(options: { address: string; }) => Promise<{ granted: boolean; }>",
+        "parameters": [
+          {
+            "name": "options",
+            "docs": "",
+            "type": "{ address: string; }"
+          }
+        ],
+        "returns": "Promise<{ granted: boolean; }>",
+        "tags": [],
+        "docs": "",
+        "complexTypes": [],
+        "slug": "requestpermission"
+      },
+      {
+        "name": "print",
+        "signature": "(options: { address: string; data: string; }) => Promise<void>",
+        "parameters": [
+          {
+            "name": "options",
+            "docs": "",
+            "type": "{ address: string; data: string; }"
+          }
+        ],
+        "returns": "Promise<void>",
+        "tags": [],
+        "docs": "",
+        "complexTypes": [],
+        "slug": "print"
+      }
+    ],
+    "properties": []
+  },
+  "interfaces": [
+    {
+      "name": "ZebraPrinterInfo",
+      "slug": "zebraprinterinfo",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "name",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [],
+          "type": "string"
+        },
+        {
+          "name": "address",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [],
+          "type": "string"
+        }
+      ]
+    }
+  ],
+  "enums": [],
+  "typeAliases": [],
+  "pluginConfigs": []
+}
